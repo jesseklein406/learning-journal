@@ -8,10 +8,15 @@ import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declarative_base
 
 
-Bass = declarative_base()
+Base = declarative_base()
 
 
-
+class Entry(Base):
+    __table__ = 'entries'
+    id = sa.Column(sa.Integer, primary_key=True)
+    title = sa.Column(sa.String)
+    date = sa.Column(sa.String)
+    content = sa.Column(sa.String)
 
 
 @view_config(route_name='home', renderer='string')
