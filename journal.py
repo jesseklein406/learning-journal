@@ -13,8 +13,14 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 
+DATABASE_URL = os.environ.get(
+    'DATABASE_URL',
+    'postgresql://<username>:<password>@localhost:5432/learning-journal'
+)
+
+
 Base = declarative_base()
-engine = sa.create_engine("postgresql://jesse@localhost:5432/learning-journal")
+engine = sa.create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
 
 
@@ -36,6 +42,7 @@ def init_db():
 
 @view_config(route_name='home', renderer='string')
 def home(request):
+    import pdb; pdb.set_trace()
     return "Hello World"
 
 
@@ -49,6 +56,7 @@ def main():
     config = Configurator(
         settings=settings
     )
+    config.include('pyramid_jinja2')
     config.add_route('home', '/')
     config.scan()
     app = config.make_wsgi_app()
