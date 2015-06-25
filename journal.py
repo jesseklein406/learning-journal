@@ -15,7 +15,7 @@ from sqlalchemy.orm import sessionmaker
 
 DATABASE_URL = os.environ.get(
     'DATABASE_URL',
-    'postgresql://<username>:<password>@localhost:5432/learning-journal'
+    'postgresql://jesse:Jjk5646!@localhost:5432/learning-journal'
 )
 
 
