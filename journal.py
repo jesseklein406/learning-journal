@@ -10,9 +10,10 @@ from pyramid.view import view_config
 from waitress import serve
 import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import scoped_session, sessionmaker
 
 
+DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 DATABASE_URL = os.environ.get(
     'DATABASE_URL',
     'postgresql://jesse:Jjk5646!@localhost:5432/learning-journal'
@@ -56,6 +57,7 @@ def main():
     config = Configurator(
         settings=settings
     )
+    config.include('pyramid_tm')
     config.include('pyramid_jinja2')
     config.add_route('home', '/')
     config.scan()
