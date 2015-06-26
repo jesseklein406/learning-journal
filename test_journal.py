@@ -4,6 +4,7 @@ import os
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.exc import IntegrityError
+import webtest
 
 TEST_DATABASE_URL = os.environ.get(
     'DATABASE_URL',
@@ -76,3 +77,62 @@ def test_entry_no_text_fails(db_session):
     journal.Entry.write(session=db_session, **bad_data)
     with pytest.raises(IntegrityError):
         db_session.flush()
+
+
+def test_read_entries_empty(db_session):
+    entries = journal.Entry.all()
+    assert len(entries) == 0
+
+
+def test_read_entries_one(db_session):
+    title_template = "Title {}"
+    text_template = "Entry Text {}"
+    # write three entries, with order clear in the title and text
+    for x in range(3):
+        journal.Entry.write(
+            title=title_template.format(x),
+            content=text_template.format(x),
+            session=db_session)
+        db_session.flush()
+    entries = journal.Entry.all()
+    assert len(entries) == 3
+    assert entries[0].title > entries[1].title > entries[2].title
+    for entry in entries:
+        assert isinstance(entry, journal.Entry)
+
+
+@pytest.fixture()
+def app():
+    from journal import main
+    from webtest import TestApp
+    app = main()
+    return TestApp(app)
+
+
+def test_empty_listing(app):
+    response = app.get('/')
+    assert response.status_code == 200
+    actual = response.body
+    expected = 'No entries here so far'
+    assert expected in actual
+
+
+@pytest.fixture()
+def entry(db_session):
+    kwargs = {'title': "Test Title", 'content': "Test Entry Text"}
+    kwargs['session'] = db_session
+    # first, assert that there are no entries in the database:
+    # assert db_session.query(journal.Entry).count() == 0
+    # now, create an entry using the 'write' class method
+    entry = journal.Entry.write(**kwargs)
+    db_session.flush()
+    return entry
+
+
+def test_listing(app, entry):
+    response = app.get('/')
+    assert response.status_code == 200
+    actual = response.body
+    for field in ['title', 'content']:
+        expected = getattr(entry, field, 'absent')
+        assert expected in actual

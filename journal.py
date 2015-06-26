@@ -33,7 +33,7 @@ class Entry(Base):
     __tablename__ = 'entries'
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
     title = sa.Column(sa.Unicode(127), nullable=False)
-    created = sa.Column(
+    date = sa.Column(
         sa.DateTime, nullable=False, default=datetime.datetime.utcnow
     )
     content = sa.Column(sa.UnicodeText, nullable=False)
@@ -46,6 +46,12 @@ class Entry(Base):
         session.add(instance)
         return instance
 
+    @classmethod
+    def all(cls, session=None):
+        if session is None:
+            session = DBSession
+        return session.query(cls).order_by(cls.date.desc()).all()
+
 
 def init_db():
     """Make a new entries table
@@ -53,10 +59,15 @@ def init_db():
     Base.metadata.create_all(bind=engine)
 
 
-@view_config(route_name='home', renderer='string')
-def home(request):
-    import pdb; pdb.set_trace()
-    return "Hello World"
+@view_config(route_name='home', renderer='templates/list.jinja2')
+def list_view(request):
+    entries = Entry.all()
+    return {'entries': entries}
+
+
+#@view_config(route_name='home', renderer='string')
+#def home(request):
+#    return "Hello World"
 
 
 def main():
