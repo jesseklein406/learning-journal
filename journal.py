@@ -12,10 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
 from zope.sqlalchemy import ZopeTransactionExtension
-<<<<<<< HEAD
-=======
 import datetime
->>>>>>> step2
 
 
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
