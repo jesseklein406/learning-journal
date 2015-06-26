@@ -4,10 +4,7 @@ import os
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.exc import IntegrityError
-<<<<<<< HEAD
-=======
 import webtest
->>>>>>> step2
 
 TEST_DATABASE_URL = os.environ.get(
     'DATABASE_URL',
@@ -144,4 +141,3 @@ def test_listing(app, entry):
     for field in ['title', 'content']:
         expected = getattr(entry, field, 'absent')
         assert expected in actual
->>>>>>> step2
