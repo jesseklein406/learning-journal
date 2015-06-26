@@ -12,6 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
 from zope.sqlalchemy import ZopeTransactionExtension
+import datetime
 
 
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
@@ -30,10 +31,20 @@ class Entry(Base):
     """Make a new entry
     """
     __tablename__ = 'entries'
-    id = sa.Column(sa.Integer, primary_key=True)
-    title = sa.Column(sa.String(127))
-    date = sa.Column(sa.DateTime)
-    content = sa.Column(sa.Text)
+    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
+    title = sa.Column(sa.Unicode(127), nullable=False)
+    created = sa.Column(
+        sa.DateTime, nullable=False, default=datetime.datetime.utcnow
+    )
+    content = sa.Column(sa.UnicodeText, nullable=False)
+
+    @classmethod
+    def write(cls, title=None, content=None, session=None):
+        if session is None:
+            session = DBSession
+        instance = cls(title=title, content=content)
+        session.add(instance)
+        return instance
 
 
 def init_db():
@@ -54,6 +65,10 @@ def main():
     debug = os.environ.get('DEBUG', True)
     settings['reload_all'] = debug
     settings['debug_all'] = debug
+    if not os.environ.get('TESTING', False):
+        # only bind the session if we are not testing
+        engine = sa.create_engine(DATABASE_URL)
+        DBSession.configure(bind=engine)
     # configuration setup
     config = Configurator(
         settings=settings
