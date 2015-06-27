@@ -5,17 +5,15 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.exc import IntegrityError
 import webtest
+from pyramid import testing
+from cryptacular.bcrypt import BCRYPTPasswordManager
 
 TEST_DATABASE_URL = os.environ.get(
     'DATABASE_URL',
     'postgresql://jesse:Jjk5646!@localhost:5432/test-learning-journal'
 )
 os.environ['DATABASE_URL'] = TEST_DATABASE_URL
-<<<<<<< HEAD
-os.environ['TESTING'] = True
 
-import journal
-=======
 os.environ['TESTING'] = "True"
 
 import journal
@@ -55,7 +53,7 @@ def test_write_entry(db_session):
     assert isinstance(entry, journal.Entry)
     # id and created are generated automatically, but only on writing to
     # the database
-    auto_fields = ['id', 'created']
+    auto_fields = ['id', 'date']
     for field in auto_fields:
         assert getattr(entry, field, None) is None
     # flush the session to "write" the data to the database
@@ -66,7 +64,7 @@ def test_write_entry(db_session):
         if field != 'session':
             assert getattr(entry, field, '') == kwargs[field]
     # id and created should be set automatically upon writing to db:
-    for auto in ['id', 'created']:
+    for auto in ['id', 'date']:
         assert getattr(entry, auto, None) is not None
 
 
@@ -141,3 +139,69 @@ def test_listing(app, entry):
     for field in ['title', 'content']:
         expected = getattr(entry, field, 'absent')
         assert expected in actual
+
+
+def test_post_to_add_view(app):
+    entry_data = {
+        'title': 'Hello there',
+        'content': 'This is a post',
+    }
+    response = app.post('/add', params=entry_data, status='3*')
+    redirected = response.follow()
+    actual = redirected.body
+    for expected in entry_data.values():
+        assert expected in actual
+
+
+def test_try_to_get(app):
+    with pytest.raises(webtest.AppError):
+        app.get('/add')
+
+
+def test_add_no_params(app):
+    response = app.post('/add', status=500)
+    assert 'IntegrityError' in response.body
+
+
+@pytest.fixture(scope='function')
+def auth_req(request):
+    manager = BCRYPTPasswordManager()
+    settings = {
+        'auth.username': 'admin',
+        'auth.password': manager.encode('secret')
+    }
+    testing.setUp(settings=settings)
+    req = testing.DummyRequest()
+
+    def cleanup():
+        testing.tearDown()
+
+    request.addfinalizer(cleanup)
+
+    return req
+
+
+def test_do_login_success(auth_req):
+    from journal import do_login
+    auth_req.params = {'username': 'admin', 'password': 'secret'}
+    assert do_login(auth_req)
+
+
+def test_do_login_bad_pass(auth_req):
+    from journal import do_login
+    auth_req.params = {'username': 'admin', 'password': 'wrong'}
+    assert not do_login(auth_req)
+
+
+def test_do_login_bad_user(auth_req):
+    from journal import do_login
+    auth_req.params = {'username': 'bad', 'password': 'secret'}
+    assert not do_login(auth_req)
+
+
+def test_do_login_missing_params(auth_req):
+    from journal import do_login
+    for params in ({'username': 'admin'}, {'password': 'secret'}):
+        auth_req.params = params
+        with pytest.raises(ValueError):
+            do_login(auth_req)
