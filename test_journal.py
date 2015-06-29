@@ -208,6 +208,7 @@ def test_do_login_missing_params(auth_req):
 
 
 INPUT_BTN = '<input type="submit" value="Share" name="Share"/>'
+CREATE_LINK = '<a href="create.html">CREATE</a>'
 
 
 def login_helper(username, password, app):
@@ -222,7 +223,7 @@ def login_helper(username, password, app):
 def test_start_as_anonymous(app):
     response = app.get('/', status=200)
     actual = response.body
-    assert INPUT_BTN not in actual
+    assert CREATE_LINK not in actual
 
 
 def test_login_success(app):
@@ -232,7 +233,7 @@ def test_login_success(app):
     response = redirect.follow()
     assert response.status_code == 200
     actual = response.body
-    assert INPUT_BTN in actual
+    assert CREATE_LINK in actual
 
 
 def test_login_fails(app):
@@ -241,7 +242,7 @@ def test_login_fails(app):
     assert response.status_code == 200
     actual = response.body
     assert "Login Failed" in actual
-    assert INPUT_BTN not in actual
+    assert CREATE_LINK not in actual
 
 
 def test_logout(app):
@@ -251,4 +252,21 @@ def test_logout(app):
     response = redirect.follow()
     assert response.status_code == 200
     actual = response.body
+    assert CREATE_LINK not in actual
+
+
+def test_no_create_form_on_home(app):
+    username, password = ('admin', 'secret')
+    redirect = login_helper(username, password, app)
+    assert redirect.status_code == 302
+    response = redirect.follow()
+    assert response.status_code == 200
+    actual = response.body
     assert INPUT_BTN not in actual
+
+
+def test_create_page_has_form(app):
+    test_login_success(app)
+    response = app.get('/create', status=200)
+    actual = response.body
+    assert CREATE_LINK in actual
