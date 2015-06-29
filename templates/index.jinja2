@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <title>Learning Journal</title>
-        <link rel="stylesheet" href="css/main.css">
+        <link rel="stylesheet" href="../static/main.css">
     </head>
     <body>
         <div id="allcontent"> <!-- jello layout -->
@@ -16,18 +16,24 @@
             <nav>
                 <ul>
                     <li><a href="/">HOME</a></li>
+                    {% if not request.authenticated_userid %}
+                    <li><a href="{{ request.route_url('login') }}">LOG IN</a></li>
+                    {% else %}
                     <li><a href="{{ request.route_url('create') }}">CREATE</a></li>
+                    <li><a href="{{ request.route_url('logout') }}">LOG OUT</a></li>
+                    {% endif %}
                 </ul>
             </nav>
             <section class="main-content">
-                <div class="create">
-                    <form action="{{ request.route_url('add') }}" method="post">
-                        <label for="title">Title:</label>
-                        <input type="text" name="title"><br>
-                        <textarea name="content" rows="13" cols="99"></textarea><br>
-                        <input type="submit" value="Share" name="Share"/>
-                    </form>
-                </div>
+                {% for entry in entries %}
+                <article class="entry">
+                    <h2>{{ entry.title }}</h2>
+                    <h2>{{ entry.date.strftime('%b. %d, %Y') }}</h2>
+                    <p>{{ entry.content|safe }}</p>
+                </article>
+                {% else %}
+                <p><em>No entries here so far</em></p>
+                {% endfor %}
             </section>
             <footer>
                 <p>

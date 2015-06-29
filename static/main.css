@@ -1,0 +1,55 @@
+body {
+    background-color: #eee;
+    font-family: sans-serif;
+    font-size: small;
+}
+
+#allcontent {
+    width: 800px;
+    padding: 5px 0;
+    background-color: #0bb;
+    margin: auto;
+}
+
+p {
+    font-size: 1.2em;
+}
+
+header {
+    font-style: oblique;
+    padding: 10px;
+}
+
+nav ul {
+    background-color: #fdfdff;
+    margin: 10px;
+    padding: 5px;
+    list-style-type: none;
+}
+
+nav ul li {
+    display: inline;
+    padding: 5px;
+}
+
+nav ul li a:link, nav ul li a:visited {
+    color: black;
+    text-decoration: none;
+}
+
+.main-content {
+    background-color: #fdfdff;
+    margin: 10px;
+}
+
+.entry, .create {
+    padding: 10px;
+}
+
+.title-input {
+    width: 50em;
+}
+
+footer {
+    padding: 10px;
+}

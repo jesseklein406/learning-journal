@@ -208,7 +208,7 @@ def test_do_login_missing_params(auth_req):
 
 
 INPUT_BTN = '<input type="submit" value="Share" name="Share"/>'
-CREATE_LINK = '<a href="create.html">CREATE</a>'
+CREATE_LINK = '<a href="http://localhost/create">CREATE</a>'   # nav bar link
 
 
 def login_helper(username, password, app):
@@ -223,7 +223,7 @@ def login_helper(username, password, app):
 def test_start_as_anonymous(app):
     response = app.get('/', status=200)
     actual = response.body
-    assert CREATE_LINK not in actual
+    assert CREATE_LINK not in actual   # check for 'CREATE' in nav bar
 
 
 def test_login_success(app):
@@ -262,11 +262,20 @@ def test_no_create_form_on_home(app):
     response = redirect.follow()
     assert response.status_code == 200
     actual = response.body
-    assert INPUT_BTN not in actual
+    assert INPUT_BTN not in actual    # check that create form is not at home
 
 
 def test_create_page_has_form(app):
     test_login_success(app)
     response = app.get('/create', status=200)
     actual = response.body
-    assert CREATE_LINK in actual
+    assert INPUT_BTN in actual    # check that create form is in create page
+
+
+def test_hacker_cannot_create(app):
+    redirect = app.get('/create', status="3*")
+    assert redirect.status_code == 302
+    response = redirect.follow()
+    assert response.status_code == 200
+    actual = response.body
+    assert INPUT_BTN not in actual    # ensure that hackers get redirected

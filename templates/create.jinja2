@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <title>Learning Journal</title>
-        <link rel="stylesheet" href="css/main.css">
+        <link rel="stylesheet" href="../static/main.css">
     </head>
     <body>
         <div id="allcontent"> <!-- jello layout -->
@@ -17,13 +17,14 @@
                 <ul>
                     <li><a href="/">HOME</a></li>
                     <li><a href="{{ request.route_url('create') }}">CREATE</a></li>
+                    <li><a href="{{ request.route_url('logout') }}">LOG OUT</a></li>
                 </ul>
             </nav>
             <section class="main-content">
                 <div class="create">
                     <form action="{{ request.route_url('add') }}" method="post">
                         <label for="title">Title:</label>
-                        <input type="text" name="title"><br>
+                        <input type="text" name="title" class="title-input"><br>
                         <textarea name="content" rows="13" cols="99"></textarea><br>
                         <input type="submit" value="Share" name="Share"/>
                     </form>

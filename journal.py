@@ -66,7 +66,7 @@ def init_db():
     Base.metadata.create_all(bind=engine)
 
 
-@view_config(route_name='home', renderer='templates/list.jinja2')
+@view_config(route_name='home', renderer='templates/index.jinja2')
 def list_view(request):
     entries = Entry.all()
     return {'entries': entries}
@@ -114,6 +114,14 @@ def login(request):
     return {'error': error, 'username': username}
 
 
+@view_config(route_name='create', renderer="templates/create.jinja2")
+def create(request):
+    """go to create page"""
+    if not request.authenticated_userid:               # hackers get redirected
+        return HTTPFound(request.route_url('login'))   # to login
+    return {}
+
+
 #@view_config(route_name='home', renderer='string')
 #def home(request):
 #    return "Hello World"
@@ -152,6 +160,7 @@ def main():
     config.add_route('add', '/add')
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
+    config.add_route('create', '/create')
     config.scan()
     app = config.make_wsgi_app()
     return app

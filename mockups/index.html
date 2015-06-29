@@ -15,29 +15,25 @@
             </header>
             <nav>
                 <ul>
-                    <li><a href="index.html">HOME</a></li>
-                    <li><a href="create.html">CREATE</a></li>
+                    <li><a href="/">HOME</a></li>
+                    {% if not request.authenticated_userid %}
+                    <li><a href="{{ request.route_url('login') }}">log in</a></li>
+                    {% else %}
+                    <li><a href="{{ request.route_url('create') }}">CREATE</a></li>
+                    <li><a href="{{ request.route_url('logout') }}">log out</a></li>
+                    {% endif %}
                 </ul>
             </nav>
             <section class="main-content">
-                <div class="entry">
-                    <form action="http://some.website" method="get">
-                        <h2>This is a title of an entry</h2>
-                        <p>
-                            <time datetime="someday">someday</time>
-                        </p>
-                        <input type="submit" name="someday" value="View">
-                    </form>
-                </div>
-                <div class="entry">
-                    <form action="http://some.website" method="get">
-                        <h2>This is a title of another entry</h2>
-                        <p>
-                            <time datetime="someotherday">some other day</time>
-                        </p>
-                        <input type="submit" name="someotherday" value="View">
-                    </form>
-                </div>
+                {% for entry in entries %}
+                <article>
+                    <h2>{{ entry.title }}</h2>
+                    <h2>{{ entry.date.strftime('%b. %d, %Y') }}</h2>
+                    <p>{{ entry.content|safe }}</p>
+                </article>
+                {% else %}
+                <p><em>No entries here so far</em></p>
+                {% endfor %}
             </section>
             <footer>
                 <p>
