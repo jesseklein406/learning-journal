@@ -136,7 +136,7 @@ def test_listing(app, entry):
     response = app.get('/')
     assert response.status_code == 200
     actual = response.body
-    for field in ['title', 'content']:
+    for field in ['title']:   # Remove 'content' from field in list view
         expected = getattr(entry, field, 'absent')
         assert expected in actual
 
@@ -149,7 +149,7 @@ def test_post_to_add_view(app):
     response = app.post('/add', params=entry_data, status='3*')
     redirected = response.follow()
     actual = redirected.body
-    for expected in entry_data.values():
+    for expected in entry_data.values()[0]:   # Just the 'title' for list view
         assert expected in actual
 
 
@@ -159,6 +159,7 @@ def test_try_to_get(app):
 
 
 def test_add_no_params(app):
+    test_login_success(app)
     response = app.post('/add', status=500)
     assert 'IntegrityError' in response.body
 
@@ -279,3 +280,17 @@ def test_hacker_cannot_create(app):
     assert response.status_code == 200
     actual = response.body
     assert INPUT_BTN not in actual    # ensure that hackers get redirected
+
+
+# Issue 1
+def test_view_unit_test_for_permalink():
+    form_str = '<form action="{{ request.route_url(%s) }}" method="get">' % "'detail'"
+    with open('templates/index.jinja2') as f:
+        home = f.read()
+    assert form_str in home
+
+
+def test_bdd_test_for_permalink(app, entry):   # Add 'entry' to get a test entry
+    form_str = '<form action="http://localhost/detail" method="get">'
+    response = app.get('/', status=200)
+    assert form_str in response

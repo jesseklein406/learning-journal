@@ -72,9 +72,20 @@ def list_view(request):
     return {'entries': entries}
 
 
+@view_config(route_name='detail', renderer='templates/detail.jinja2')
+def detail_view(request, session=None):
+    entry_id = request.params.get('id')
+    if session is None:
+        session = DBSession
+    entry = session.query(Entry).filter_by(id=entry_id)
+    return {'entry': entry}
+
+
 @view_config(route_name='add', request_method='POST')
 def add_entry(request):
-    title = request.params.get('title')
+    if not request.authenticated_userid:               # accounts for hackers
+        return HTTPFound(request.route_url('login'))   # using sneaky requests
+    title = request.params.get('title')                # library
     content = request.params.get('content')
     Entry.write(title=title, content=content)
     return HTTPFound(request.route_url('home'))
@@ -161,6 +172,7 @@ def main():
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
     config.add_route('create', '/create')
+    config.add_route('detail', '/detail')
     config.scan()
     app = config.make_wsgi_app()
     return app

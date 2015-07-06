@@ -1,0 +1,8 @@
+{% extends "base2.jinja2" %}
+{% block body %}
+        <article class="entry">
+            <h2>{{ entry.title }}</h2>
+            <h2>{{ entry.date.strftime('%b. %d, %Y') }}</h2>
+            <p>{{ entry.content|safe }}</p>
+        </article>
+{% endblock %}

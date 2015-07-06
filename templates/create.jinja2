@@ -1,40 +1,11 @@
-<!doctype html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <title>Learning Journal</title>
-        <link rel="stylesheet" href="../static/main.css">
-    </head>
-    <body>
-        <div id="allcontent"> <!-- jello layout -->
-            <header>
-                <h1>Jesse's Learning Journal</h1>
-                <p>
-                    Documenting my progress during the summer of 2015
-                </p>
-            </header>
-            <nav>
-                <ul>
-                    <li><a href="/">HOME</a></li>
-                    <li><a href="{{ request.route_url('create') }}">CREATE</a></li>
-                    <li><a href="{{ request.route_url('logout') }}">LOG OUT</a></li>
-                </ul>
-            </nav>
-            <section class="main-content">
-                <div class="create">
-                    <form action="{{ request.route_url('add') }}" method="post">
-                        <label for="title">Title:</label>
-                        <input type="text" name="title" class="title-input"><br>
-                        <textarea name="content" rows="13" cols="99"></textarea><br>
-                        <input type="submit" value="Share" name="Share"/>
-                    </form>
-                </div>
-            </section>
-            <footer>
-                <p>
-                    Jesse Klein, 2015
-                </p>
-            </footer>
-        </div>
-    </body>
-</html>
+{% extends "base2.jinja2" %}
+{% block body %}
+    <div class="create">
+        <form action="{{ request.route_url('add') }}" method="post">
+            <label for="title">Title:</label>
+            <input type="text" name="title" class="title-input"><br>
+            <textarea name="content" rows="13" cols="99"></textarea><br>
+            <input type="submit" value="Share" name="Share"/>
+        </form>
+    </div>
+{% endblock %}
