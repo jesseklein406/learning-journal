@@ -77,6 +77,15 @@ def detail_view(request, session=None):
     entry_id = request.params.get('id')
     if session is None:
         session = DBSession
+    entry = session.query(Entry).get(entry_id)
+    return {'entry': entry}
+
+
+@view_config(route_name='edit', renderer='templates/edit.jinja2')
+def edit_view(request, session=None):
+    entry_id = request.params.get('id')
+    if session is None:
+        session = DBSession
     entry = session.query(Entry).filter_by(id=entry_id)
     return {'entry': entry}
 
@@ -173,6 +182,7 @@ def main():
     config.add_route('logout', '/logout')
     config.add_route('create', '/create')
     config.add_route('detail', '/detail')
+    config.add_route('edit', '/edit')
     config.scan()
     app = config.make_wsgi_app()
     return app

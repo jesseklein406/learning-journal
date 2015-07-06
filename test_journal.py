@@ -290,7 +290,38 @@ def test_view_unit_test_for_permalink():
     assert form_str in home
 
 
-def test_bdd_test_for_permalink(app, entry):   # Add 'entry' to get a test entry
+def test_bdd_test_for_permalink(app, entry):  # Add 'entry' to get a test entry
     form_str = '<form action="http://localhost/detail" method="get">'
     response = app.get('/', status=200)
     assert form_str in response
+
+
+def test_bdd_test_for_detail_content(app, entry):  # Add 'entry' to get a test entry
+    content_str = '<p>Test Entry Text</p>'
+    response = app.get('/detail', params={'id': entry.id}, status=200)
+    assert content_str in response
+
+
+"""
+# Issue 2
+def test_view_unit_test_for_add_editing():
+    form_str = '<form action="{{ request.route_url(%s) }}" method="get">' % "'edit'"
+    with open('templates/detail.jinja2') as f:
+        detail = f.read()
+    assert form_str in detail
+
+
+def test_bdd_test_for_add_editing(app, entry):  # Add 'entry' to get a test entry
+    test_login_success(app)
+    # Test for editable title form in response
+    form_str = '<input type="text" name="title" value="Test Title" class="title-input">'
+    response = app.get('/detail', status=200)
+    assert content_str in response
+
+
+def test_bdd_test_for_add_editing(app, entry):  # Add 'entry' to get a test entry
+    test_login_success(app)
+    content_str = '<p>Test Entry Text</p>'   # Test entry content
+    response = app.get('/', status=200)
+    assert content_str in response
+"""

@@ -1,8 +1,12 @@
 {% extends "base2.jinja2" %}
 {% block body %}
-        <article class="entry">
+    <article class="entry">
+        <form action="{{ request.route_url('edit') }}" method="get">
             <h2>{{ entry.title }}</h2>
             <h2>{{ entry.date.strftime('%b. %d, %Y') }}</h2>
             <p>{{ entry.content|safe }}</p>
-        </article>
+            <input type="hidden" name="id" value="{{ entry.id }}">
+            <input type="submit" name="edit" value="Edit">
+        </form>
+    </article>
 {% endblock %}
