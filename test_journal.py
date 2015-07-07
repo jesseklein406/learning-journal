@@ -17,6 +17,7 @@ os.environ['DATABASE_URL'] = TEST_DATABASE_URL
 os.environ['TESTING'] = "True"
 
 import journal
+from markdown import markdown
 
 
 @pytest.fixture(scope='session')
@@ -125,7 +126,7 @@ def entry(db_session):
     kwargs = {'title': "Test Title", 'content': "Test Entry Text"}
     kwargs['session'] = db_session
     # first, assert that there are no entries in the database:
-    # assert db_session.query(journal.Entry).count() == 0
+    assert db_session.query(journal.Entry).count() == 0
     # now, create an entry using the 'write' class method
     entry = journal.Entry.write(**kwargs)
     db_session.flush()
@@ -282,7 +283,7 @@ def test_hacker_cannot_create(app):
     assert INPUT_BTN not in actual    # ensure that hackers get redirected
 
 
-# Issue 1
+# Issue 1 (detail)
 
 def test_view_unit_test_for_permalink():
     form_str = '<form action="{{ request.route_url(%s) }}" method="get">' % "'detail'"
@@ -303,7 +304,7 @@ def test_bdd_test_for_detail_content(app, entry):  # Add 'entry' to get a test e
     assert content_str in response
 
 
-# Issue 2
+# Issue 2 (editing)
 
 def test_view_unit_test_for_add_editing():
     form_str = '<form action="{{ request.route_url(%s) }}" method="get">' % "'edit'"
@@ -351,3 +352,28 @@ def test_hacker_cannot_post_to_commit(app):
     response = app.post('/commit', params=params, status='3*')
     redirected = response.follow()
     assert "Login" in redirected    # hackers get redirected to Login
+
+
+# Issue 3 (markdown)
+
+@pytest.fixture()
+def markdown_entry(db_session):
+    kwargs = {'title': "Test Title", 'content': "###Should be heading"}
+    kwargs['session'] = db_session
+    entry = journal.Entry.write(**kwargs)
+    db_session.flush()
+    return entry
+
+
+def test_unit_test_for_markdown():
+    text = "###Should be heading"
+    md = markdown(text)
+    assert md == "<h3>Should be heading</h3>"
+
+
+def test_bdd_test_for_markdown(app, markdown_entry):  # Get a test entry
+    test_login_success(app)
+    # Test for heading in detail response
+    content_str = '<h3>Should be heading</h3>'
+    response = app.get('/detail', params={'id': markdown_entry.id}, status=200)
+    assert content_str in response
