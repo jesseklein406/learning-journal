@@ -83,15 +83,32 @@ def detail_view(request, session=None):
 
 @view_config(route_name='edit', renderer='templates/edit.jinja2')
 def edit_view(request, session=None):
+    if not request.authenticated_userid:               # hackers get redirected
+        return HTTPFound(request.route_url('login'))   # to login
     entry_id = request.params.get('id')
     if session is None:
         session = DBSession
-    entry = session.query(Entry).filter_by(id=entry_id)
+    entry = session.query(Entry).get(entry_id)
     return {'entry': entry}
 
 
+@view_config(route_name='commit', request_method='POST')
+def commit_changes(request, session=None):
+    if not request.authenticated_userid:               # accounts for hackers
+        return HTTPFound(request.route_url('login'))   # using sneaky requests
+    title = request.params.get('title')                # library
+    content = request.params.get('content')
+    entry_id = request.params.get('id')
+    if session is None:
+        session = DBSession
+    entry = session.query(Entry).get(entry_id)
+    entry.title = title
+    entry.content = content
+    return HTTPFound(request.route_url('home'))
+
+
 @view_config(route_name='add', request_method='POST')
-def add_entry(request):
+def add_entry(request, session=None):
     if not request.authenticated_userid:               # accounts for hackers
         return HTTPFound(request.route_url('login'))   # using sneaky requests
     title = request.params.get('title')                # library
@@ -183,6 +200,7 @@ def main():
     config.add_route('create', '/create')
     config.add_route('detail', '/detail')
     config.add_route('edit', '/edit')
+    config.add_route('commit', '/commit')
     config.scan()
     app = config.make_wsgi_app()
     return app

@@ -283,6 +283,7 @@ def test_hacker_cannot_create(app):
 
 
 # Issue 1
+
 def test_view_unit_test_for_permalink():
     form_str = '<form action="{{ request.route_url(%s) }}" method="get">' % "'detail'"
     with open('templates/index.jinja2') as f:
@@ -302,8 +303,8 @@ def test_bdd_test_for_detail_content(app, entry):  # Add 'entry' to get a test e
     assert content_str in response
 
 
-"""
 # Issue 2
+
 def test_view_unit_test_for_add_editing():
     form_str = '<form action="{{ request.route_url(%s) }}" method="get">' % "'edit'"
     with open('templates/detail.jinja2') as f:
@@ -311,17 +312,42 @@ def test_view_unit_test_for_add_editing():
     assert form_str in detail
 
 
+def test_bdd_test_for_edit_button(app, entry):  # Add 'entry' to get a test entry
+    test_login_success(app)
+    form_str = '<form action="http://localhost/edit" method="get">'
+    response = app.get('/detail', params={'id': entry.id}, status=200)
+    assert form_str in response
+
+
 def test_bdd_test_for_add_editing(app, entry):  # Add 'entry' to get a test entry
     test_login_success(app)
     # Test for editable title form in response
     form_str = '<input type="text" name="title" value="Test Title" class="title-input">'
-    response = app.get('/detail', status=200)
-    assert content_str in response
+    response = app.get('/edit', params={'id': entry.id}, status=200)
+    assert form_str in response
 
 
-def test_bdd_test_for_add_editing(app, entry):  # Add 'entry' to get a test entry
+def test_bdd_test_for_try_editing(app, entry):  # Add 'entry' to get a test entry
     test_login_success(app)
-    content_str = '<p>Test Entry Text</p>'   # Test entry content
-    response = app.get('/', status=200)
-    assert content_str in response
-"""
+    # Test for editable title form in response
+    new_title = 'new title'
+    params = {'title': 'new title', 'content': 'new stuff', 'id': entry.id}
+    response = app.post('/commit', params=params, status='3*')
+    redirected = response.follow()
+    assert new_title in redirected
+
+
+# Check security against sneaky requests penetration
+
+def test_hacker_cannot_post_to_add(app):
+    params = {'title': 'hacker', 'content': 'going hacking'}
+    response = app.post('/add', params=params, status='3*')
+    redirected = response.follow()
+    assert "Login" in redirected    # hackers get redirected to Login
+
+
+def test_hacker_cannot_post_to_commit(app):
+    params = {'title': 'hacker', 'content': 'going hacking', 'id': 1}
+    response = app.post('/commit', params=params, status='3*')
+    redirected = response.follow()
+    assert "Login" in redirected    # hackers get redirected to Login

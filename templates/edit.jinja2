@@ -1,0 +1,12 @@
+{% extends "base2.jinja2" %}
+{% block body %}
+        <article class="entry">
+            <form action="{{ request.route_url('commit') }}" method="post">
+                <label for="title">Title:</label>
+                <input type="text" name="title" value="{{ entry.title }}" class="title-input"><br>
+                <textarea name="content" rows="13" cols="99" value="{{ entry.content|safe }}"></textarea><br>
+                <input type="hidden" name="id" value="{{ entry.id }}">
+                <input type="submit" name="commit" value="Commit">
+            </form>
+        </article>
+{% endblock %}

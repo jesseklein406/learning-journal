@@ -6,7 +6,9 @@
             <h2>{{ entry.date.strftime('%b. %d, %Y') }}</h2>
             <p>{{ entry.content|safe }}</p>
             <input type="hidden" name="id" value="{{ entry.id }}">
-            <input type="submit" name="edit" value="Edit">
+            {% if request.authenticated_userid %}
+                <input type="submit" name="edit" value="Edit">
+            {% endif %}
         </form>
     </article>
 {% endblock %}
