@@ -1,7 +1,7 @@
 Jesse's Learning Journal
 ========================
 
-This is my repo containing different parts of my learning journal.
+This is my repo containing different parts of my learning journal. To solve the four latest issues, I used forms to pass all of my get and post params.
 
 Mockups
 -------

@@ -17,7 +17,7 @@ os.environ['DATABASE_URL'] = TEST_DATABASE_URL
 os.environ['TESTING'] = "True"
 
 import journal
-from markdown import markdown
+import markdown
 
 
 @pytest.fixture(scope='session')
@@ -367,7 +367,7 @@ def markdown_entry(db_session):
 
 def test_unit_test_for_markdown():
     text = "###Should be heading"
-    md = markdown(text)
+    md = markdown.markdown(text)
     assert md == "<h3>Should be heading</h3>"
 
 
@@ -377,3 +377,37 @@ def test_bdd_test_for_markdown(app, markdown_entry):  # Get a test entry
     content_str = '<h3>Should be heading</h3>'
     response = app.get('/detail', params={'id': markdown_entry.id}, status=200)
     assert content_str in response
+
+
+# Issue 4 (color coding)
+
+COLOR_CONTENT = """    :::python
+    def jesse(klein):
+        return klein"""
+
+FUNC_NAME = '<span style="color: #0000FF">jesse</span>'  # function name is blue
+
+
+@pytest.fixture()
+def color_entry(db_session):
+    kwargs = {'title': "Test Title", 'content': COLOR_CONTENT}
+    kwargs['session'] = db_session
+    entry = journal.Entry.write(**kwargs)
+    db_session.flush()
+    return entry
+
+
+def test_unit_test_for_color():
+    colorized = markdown.markdown(
+        COLOR_CONTENT,
+        extensions=['markdown.extensions.codehilite'],
+        extension_configs={'markdown.extensions.codehilite': {'noclasses': True}}
+    )
+    assert FUNC_NAME in colorized   # function name is blue
+
+
+def test_bdd_test_for_color(app, color_entry):  # Get a test entry
+    test_login_success(app)
+    # Test for blue function in detail response
+    response = app.get('/detail', params={'id': color_entry.id}, status=200)
+    assert FUNC_NAME in response

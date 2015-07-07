@@ -19,7 +19,7 @@ from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 from cryptacular.bcrypt import BCRYPTPasswordManager
 from pyramid.security import remember, forget
-from markdown import markdown
+import markdown
 
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -79,7 +79,11 @@ def detail_view(request, session=None):
     if session is None:
         session = DBSession
     entry = session.query(Entry).get(entry_id)
-    entry.content = markdown(entry.content)
+    entry.content = markdown.markdown(
+        entry.content,
+        extensions=['markdown.extensions.codehilite'],
+        extension_configs={'markdown.extensions.codehilite': {'noclasses': True}}
+    )
     return {'entry': entry}
 
 
