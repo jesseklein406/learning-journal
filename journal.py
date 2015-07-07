@@ -79,7 +79,7 @@ def detail_view(request, session=None):
     if session is None:
         session = DBSession
     entry = session.query(Entry).get(entry_id)
-    entry.content = markdown.markdown(
+    entry.content_md = markdown.markdown(
         entry.content,
         extensions=['markdown.extensions.codehilite'],
         extension_configs={'markdown.extensions.codehilite': {'noclasses': True}}

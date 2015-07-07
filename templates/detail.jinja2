@@ -4,7 +4,7 @@
         <form action="{{ request.route_url('edit') }}" method="get">
             <h2>{{ entry.title }}</h2>
             <h2>{{ entry.date.strftime('%b. %d, %Y') }}</h2>
-            <p>{{ entry.content|safe }}</p>
+            <p>{{ entry.content_md|safe }}</p>
             <input type="hidden" name="id" value="{{ entry.id }}">
             {% if request.authenticated_userid %}
                 <input type="submit" name="edit" value="Edit">
