@@ -60,6 +60,16 @@ class Entry(Base):
             session = DBSession
         return session.query(cls).order_by(cls.date.desc()).all()
 
+    @property
+    def content_md(self):
+        return markdown.markdown(
+            self.content,
+            extensions=['markdown.extensions.codehilite'],
+            extension_configs={
+                'markdown.extensions.codehilite': {'noclasses': True}
+            }
+        )
+
 
 def init_db():
     """Make a new entries table
@@ -78,12 +88,7 @@ def detail_view(request, session=None):
     entry_id = request.params.get('id')
     if session is None:
         session = DBSession
-    entry = session.query(Entry).get(entry_id)
-    entry.content_md = markdown.markdown(
-        entry.content,
-        extensions=['markdown.extensions.codehilite'],
-        extension_configs={'markdown.extensions.codehilite': {'noclasses': True}}
-    )
+    entry = session.query(Entry).filter(Entry.id == entry_id).one()
     return {'entry': entry}
 
 
@@ -94,7 +99,7 @@ def edit_view(request, session=None):
     entry_id = request.params.get('id')
     if session is None:
         session = DBSession
-    entry = session.query(Entry).get(entry_id)
+    entry = session.query(Entry).filter(Entry.id == entry_id).one()
     return {'entry': entry}
 
 
@@ -107,7 +112,7 @@ def commit_changes(request, session=None):
     entry_id = request.params.get('id')
     if session is None:
         session = DBSession
-    entry = session.query(Entry).get(entry_id)
+    entry = session.query(Entry).filter(Entry.id == entry_id).one()
     entry.title = title
     entry.content = content
     return HTTPFound(request.route_url('home'))
@@ -163,11 +168,6 @@ def create(request):
     if not request.authenticated_userid:               # hackers get redirected
         return HTTPFound(request.route_url('login'))   # to login
     return {}
-
-
-#@view_config(route_name='home', renderer='string')
-#def home(request):
-#    return "Hello World"
 
 
 def main():
