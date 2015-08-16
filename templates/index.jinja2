@@ -1,45 +1,15 @@
-<!doctype html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <title>Learning Journal</title>
-        <link rel="stylesheet" href="../static/main.css">
-    </head>
-    <body>
-        <div id="allcontent"> <!-- jello layout -->
-            <header>
-                <h1>Jesse's Learning Journal</h1>
-                <p>
-                    Documenting my progress during the summer of 2015
-                </p>
-            </header>
-            <nav>
-                <ul>
-                    <li><a href="/">HOME</a></li>
-                    {% if not request.authenticated_userid %}
-                    <li><a href="{{ request.route_url('login') }}">LOG IN</a></li>
-                    {% else %}
-                    <li><a href="{{ request.route_url('create') }}">CREATE</a></li>
-                    <li><a href="{{ request.route_url('logout') }}">LOG OUT</a></li>
-                    {% endif %}
-                </ul>
-            </nav>
-            <section class="main-content">
-                {% for entry in entries %}
-                <article class="entry">
-                    <h2>{{ entry.title }}</h2>
-                    <h2>{{ entry.date.strftime('%b. %d, %Y') }}</h2>
-                    <p>{{ entry.content|safe }}</p>
-                </article>
-                {% else %}
-                <p><em>No entries here so far</em></p>
-                {% endfor %}
-            </section>
-            <footer>
-                <p>
-                    Jesse Klein, 2015
-                </p>
-            </footer>
-        </div>
-    </body>
-</html>
+{% extends "base2.jinja2" %}
+{% block body %}
+    {% for entry in entries %}
+        <article class="entry">
+            <form action="{{ request.route_url('detail') }}" method="get">
+                <h2>{{ entry.title }}</h2>
+                <h2>{{ entry.date.strftime('%b. %d, %Y') }}</h2>
+                <input type="hidden" name="id" value="{{ entry.id }}">
+                <input type="submit" name="view" value="View">
+            </form>
+        </article>
+    {% else %}
+        <p><em>No entries here so far</em></p>
+    {% endfor %}
+{% endblock %}
