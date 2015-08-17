@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 import webtest
 from pyramid import testing
 from cryptacular.bcrypt import BCRYPTPasswordManager
+from splinter.browser import Browser
 
 TEST_DATABASE_URL = os.environ.get(
     'DATABASE_URL',
@@ -411,3 +412,117 @@ def test_bdd_test_for_color(app, color_entry):  # Get a test entry
     # Test for blue function in detail response
     response = app.get('/detail', params={'id': color_entry.id}, status=200)
     assert FUNC_NAME in response
+
+
+# Pytest-splinter tests require app running on localhost:5000
+
+def splinter_login_helper(browser):
+    browser.visit('http://127.0.0.1:5000/login')
+    browser.fill('username', 'admin')
+    browser.fill('password', 'secret')
+    browser.find_by_value('Login')[0].click()
+
+
+# Add ajax
+
+# def test_create_response_url():
+#     with Browser() as browser:
+#         splinter_login_helper(browser)
+#         browser.visit('http://127.0.0.1:5000/create')
+#         browser.fill('title', 'A title')
+#         browser.fill('content', 'Some content')
+#         browser.find_by_value('Share')[0].click()
+#         assert browser.url == 'http://127.0.0.1:5000/create'
+
+
+# def test_edit_response_url():
+#     with Browser() as browser:
+#         splinter_login_helper(browser)
+#         browser.visit('http://127.0.0.1:5000/')
+#         browser.find_by_value('View')[0].click()
+#         browser.find_by_value('Edit')[0].click()
+#         browser.fill('title', 'changed')
+#         browser.fill('content', 'changed')
+#         browser.find_by_value('Commit')[0].click()
+#         assert browser.url == 'http://127.0.0.1:5000/edit'
+
+
+@pytest.fixture(scope='function')
+def nojs(request):
+    from os.path import expanduser
+    home = expanduser("~")
+    js_off = 'user_pref("javascript.enabled", false);\n'
+
+    # Change firefox default config filename as necessary
+    with open(
+        '{}/Library/Application Support/Firefox/Profiles/v1ojo5gv.default/prefs.js'.format(
+            home
+        ),
+        'a'
+    ) as fh:
+        fh.write(js_off)
+
+    def fin():
+        with open(
+            '{}/Library/Application Support/Firefox/Profiles/v1ojo5gv.default/prefs.js'.format(
+                home
+            ),
+            'r'
+        ) as fh:
+            old = fh.read()
+
+        new = old[:-40]
+
+        with open(
+            '{}/Library/Application Support/Firefox/Profiles/v1ojo5gv.default/prefs.js'.format(
+                home
+            ),
+            'w'
+        ) as fh:
+            fh.write(new)
+
+    request.addfinalizer(fin)
+
+
+# Add functioning without javascript
+
+# def test_create_without_javascript(nojs):
+#     with Browser() as browser:
+#         splinter_login_helper(browser)
+#         browser.visit('http://127.0.0.1:5000/create')
+#         browser.fill('title', 'Another title')
+#         browser.fill('content', 'Different content')
+#         browser.find_by_value('Share')[0].click()
+#         assert browser.url == 'http://127.0.0.1:5000/'
+#         created = browser.find_by_tag('h2')[0].text
+#         assert created == 'Another title'
+
+
+# def test_edit_without_javascript(nojs):
+#     with Browser() as browser:
+#         splinter_login_helper(browser)
+#         browser.visit('http://127.0.0.1:5000/')
+#         browser.find_by_value('View')[0].click()
+#         browser.find_by_value('Edit')[0].click()
+#         browser.fill('title', 'new change')
+#         browser.fill('content', 'new change')
+#         browser.find_by_value('Commit')[0].click()
+#         assert browser.url == 'http://127.0.0.1:5000/'
+#         changed = browser.find_by_tag('h2')[0].text
+#         assert changed == 'new change'
+
+
+# Add test for twitter
+
+# def test_twitter():
+#     with Browser() as browser:
+#         splinter_login_helper(browser)
+#         browser.visit('http://127.0.0.1:5000/create')
+#         browser.fill('title', 'test')
+#         browser.fill('content', 'test')
+#         browser.find_by_value('Share')[0].click()
+#         browser.visit('http://127.0.0.1:5000/')
+#         browser.find_by_value('View')[0].click()
+#         time.sleep(10)
+#         import pdb; pdb.set_trace()
+#         browser.find_by_tag('a')[3].click()

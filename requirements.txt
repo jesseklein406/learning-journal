@@ -18,8 +18,11 @@ pyramid-jinja2==2.5
 pyramid-tm==0.12
 pytest==2.7.2
 pytest-bdd==2.13.1
+pytest-splinter==1.4.6
 repoze.lru==0.6
+selenium==2.47.1
 six==1.9.0
+splinter==0.7.3
 SQLAlchemy==1.0.5
 transaction==1.4.4
 translationstring==1.3
