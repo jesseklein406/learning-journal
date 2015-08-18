@@ -17,3 +17,13 @@ journal.py
 ----------
 
 The module journal.py is the file that stores my deployed app.
+
+AJAX and Twitter
+----------------
+
+If javascript is enabled, the site will submit changes via AJAX. I referred to Jon Duckett's book, and Jonathan Stallings helped resolve bugs. 
+
+Duckett, J., & Ruppert, G. (n.d.). [i]JavaScript & jQuery: Interactive front-end web development.[/i]
+
+
+The site now includes a twitter button.
