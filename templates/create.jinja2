@@ -1,11 +1,14 @@
 {% extends "base2.jinja2" %}
 {% block body %}
     <div class="create">
-        <form action="{{ request.route_url('add') }}" method="post">
+        <form id="persist" action="{{ request.route_url('add') }}" method="post">
             <label for="title">Title:</label>
             <input type="text" name="title" class="title-input"><br>
-            <textarea name="content" rows="13" cols="99"></textarea><br>
+            <textarea name="content" rows="13" cols="99"></textarea>
+            <p id="message"></p>
             <input type="submit" value="Share" name="Share"/>
         </form>
     </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="/static/add.js"></script>
 {% endblock %}

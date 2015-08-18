@@ -8,6 +8,7 @@ import webtest
 from pyramid import testing
 from cryptacular.bcrypt import BCRYPTPasswordManager
 from splinter.browser import Browser
+import time
 
 TEST_DATABASE_URL = os.environ.get(
     'DATABASE_URL',
@@ -425,104 +426,75 @@ def splinter_login_helper(browser):
 
 # Add ajax
 
-# def test_create_response_url():
-#     with Browser() as browser:
-#         splinter_login_helper(browser)
-#         browser.visit('http://127.0.0.1:5000/create')
-#         browser.fill('title', 'A title')
-#         browser.fill('content', 'Some content')
-#         browser.find_by_value('Share')[0].click()
-#         assert browser.url == 'http://127.0.0.1:5000/create'
+def test_create_response_url():
+    with Browser() as browser:
+        splinter_login_helper(browser)
+        browser.visit('http://127.0.0.1:5000/create')
+        browser.fill('title', 'A title')
+        browser.fill('content', 'Some content')
+        browser.find_by_value('Share')[0].click()
+        assert browser.url == 'http://127.0.0.1:5000/create'
 
 
-# def test_edit_response_url():
-#     with Browser() as browser:
-#         splinter_login_helper(browser)
-#         browser.visit('http://127.0.0.1:5000/')
-#         browser.find_by_value('View')[0].click()
-#         browser.find_by_value('Edit')[0].click()
-#         browser.fill('title', 'changed')
-#         browser.fill('content', 'changed')
-#         browser.find_by_value('Commit')[0].click()
-#         assert browser.url == 'http://127.0.0.1:5000/edit'
-
-
-@pytest.fixture(scope='function')
-def nojs(request):
-    from os.path import expanduser
-    home = expanduser("~")
-    js_off = 'user_pref("javascript.enabled", false);\n'
-
-    # Change firefox default config filename as necessary
-    with open(
-        '{}/Library/Application Support/Firefox/Profiles/v1ojo5gv.default/prefs.js'.format(
-            home
-        ),
-        'a'
-    ) as fh:
-        fh.write(js_off)
-
-    def fin():
-        with open(
-            '{}/Library/Application Support/Firefox/Profiles/v1ojo5gv.default/prefs.js'.format(
-                home
-            ),
-            'r'
-        ) as fh:
-            old = fh.read()
-
-        new = old[:-40]
-
-        with open(
-            '{}/Library/Application Support/Firefox/Profiles/v1ojo5gv.default/prefs.js'.format(
-                home
-            ),
-            'w'
-        ) as fh:
-            fh.write(new)
-
-    request.addfinalizer(fin)
+def test_edit_response_url():
+    with Browser() as browser:
+        splinter_login_helper(browser)
+        browser.visit('http://127.0.0.1:5000/')
+        browser.find_by_value('View')[0].click()
+        browser.find_by_value('Edit')[0].click()
+        browser.fill('title', 'changed')
+        browser.fill('content', 'changed')
+        eid = browser.find_by_tag('input')[1].value
+        browser.find_by_value('Commit')[0].click()
+        assert browser.url == 'http://127.0.0.1:5000/edit?id=%s&edit=Edit' % eid
 
 
 # Add functioning without javascript
 
-# def test_create_without_javascript(nojs):
-#     with Browser() as browser:
-#         splinter_login_helper(browser)
-#         browser.visit('http://127.0.0.1:5000/create')
-#         browser.fill('title', 'Another title')
-#         browser.fill('content', 'Different content')
-#         browser.find_by_value('Share')[0].click()
-#         assert browser.url == 'http://127.0.0.1:5000/'
-#         created = browser.find_by_tag('h2')[0].text
-#         assert created == 'Another title'
+def no_js(browser):
+    browser.visit('chrome://settings-frame/content')
+    browser.find_by_name('javascript')[1].click()
+    browser.find_by_id('content-settings-overlay-confirm').click()
 
 
-# def test_edit_without_javascript(nojs):
-#     with Browser() as browser:
-#         splinter_login_helper(browser)
-#         browser.visit('http://127.0.0.1:5000/')
-#         browser.find_by_value('View')[0].click()
-#         browser.find_by_value('Edit')[0].click()
-#         browser.fill('title', 'new change')
-#         browser.fill('content', 'new change')
-#         browser.find_by_value('Commit')[0].click()
-#         assert browser.url == 'http://127.0.0.1:5000/'
-#         changed = browser.find_by_tag('h2')[0].text
-#         assert changed == 'new change'
+def restore_js(browser):
+    browser.visit('chrome://settings-frame/content')
+    browser.find_by_name('javascript')[0].click()
+    browser.find_by_id('content-settings-overlay-confirm').click()
 
 
-# Add test for twitter
+def test_create_without_javascript():
+    with Browser('chrome') as browser:
+        no_js(browser)
+        splinter_login_helper(browser)
+        time.sleep(0.1)
+        browser.visit('http://127.0.0.1:5000/create')
+        time.sleep(0.1)
+        browser.fill('title', 'Another title')
+        browser.fill('content', 'Different content')
+        browser.find_by_value('Share')[0].click()
+        time.sleep(0.1)
+        assert browser.url == 'http://127.0.0.1:5000/'
+        created = browser.find_by_tag('h2')[0].text
+        assert created == 'Another title'
+        restore_js(browser)
 
-# def test_twitter():
-#     with Browser() as browser:
-#         splinter_login_helper(browser)
-#         browser.visit('http://127.0.0.1:5000/create')
-#         browser.fill('title', 'test')
-#         browser.fill('content', 'test')
-#         browser.find_by_value('Share')[0].click()
-#         browser.visit('http://127.0.0.1:5000/')
-#         browser.find_by_value('View')[0].click()
-#         time.sleep(10)
-#         import pdb; pdb.set_trace()
-#         browser.find_by_tag('a')[3].click()
+
+def test_edit_without_javascript():
+    with Browser('chrome') as browser:
+        no_js(browser)
+        splinter_login_helper(browser)
+        time.sleep(0.1)
+        browser.visit('http://127.0.0.1:5000/')
+        browser.find_by_value('View')[0].click()
+        time.sleep(0.1)
+        browser.find_by_value('Edit')[0].click()
+        time.sleep(0.1)
+        browser.fill('title', 'new change')
+        browser.fill('content', 'new change')
+        browser.find_by_value('Commit')[0].click()
+        time.sleep(0.1)
+        assert browser.url == 'http://127.0.0.1:5000/'
+        changed = browser.find_by_tag('h2')[0].text
+        assert changed == 'new change'
+        restore_js(browser)

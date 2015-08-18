@@ -1,12 +1,15 @@
 {% extends "base2.jinja2" %}
 {% block body %}
-        <article class="entry">
-            <form action="{{ request.route_url('commit') }}" method="post">
-                <label for="title">Title:</label>
-                <input type="text" name="title" value="{{ entry.title }}" class="title-input"><br>
-                <textarea name="content" rows="13" cols="99">{{ entry.content|safe }}</textarea><br>
-                <input type="hidden" name="id" value="{{ entry.id }}">
-                <input type="submit" name="commit" value="Commit">
-            </form>
-        </article>
+    <article class="entry">
+        <form id="persist" action="{{ request.route_url('commit') }}" method="post">
+            <label for="title">Title:</label>
+            <input type="text" name="title" value="{{ entry.title }}" class="title-input"><br>
+            <textarea name="content" rows="13" cols="99">{{ entry.content|safe }}</textarea>
+            <p id="message"></p>
+            <input type="hidden" name="id" value="{{ entry.id }}">
+            <input type="submit" name="commit" value="Commit">
+        </form>
+    </article>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="/static/commit.js"></script>
 {% endblock %}
